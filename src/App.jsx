@@ -345,6 +345,10 @@ function App() {
         await generatePlanLocal(alt)
         return
       }
+      
+      // Додаткове логування для дебагу
+      console.log('AI Response:', content)
+      
       const lines = content.split('\n').map(l => l.trim()).filter(Boolean)
       let roleLine = lines.find(l => /роль|роль:/i.test(l)) || lines[0] || ''
       roleLine = roleLine
@@ -383,11 +387,27 @@ function App() {
       // Якщо покроковий план не знайдено, шукаємо детальніше
       let finalStepsSection = stepsSection
       if (!finalStepsSection) {
-        const detailedSteps = planLines.filter(l => /^\d+[\)\.]|^[•-]\s*\d+/.test(l))
-        if (detailedSteps.length > 0) {
-          finalStepsSection = 'Покроковий план: ' + detailedSteps.slice(0, 5).map((step, i) => 
+        // Шукаємо в усіх рядках, а не тільки в planLines
+        const allDetailedSteps = lines.filter(l => /^\d+[\)\.]|^[•-]\s*\d+/.test(l))
+        if (allDetailedSteps.length > 0) {
+          finalStepsSection = 'Покроковий план: ' + allDetailedSteps.slice(0, 5).map((step, i) => 
             `${i + 1}) ${step.replace(/^[•\-\d\)\.\s]+/, '')}`
           ).join('\n')
+        }
+      }
+      
+      // Додатковий пошук для різних форматів
+      if (!finalStepsSection) {
+        // Шукаємо рядки, які починаються з "Покроковий план:" або схожих
+        const stepsHeaderIdx = lines.findIndex(l => /покроков|крок|план.*:/i.test(l))
+        if (stepsHeaderIdx >= 0) {
+          const stepsAfterHeader = lines.slice(stepsHeaderIdx + 1)
+          const actualSteps = stepsAfterHeader.filter(l => l.trim().length > 0).slice(0, 5)
+          if (actualSteps.length > 0) {
+            finalStepsSection = 'Покроковий план: ' + actualSteps.map((step, i) => 
+              `${i + 1}) ${step.trim()}`
+            ).join('\n')
+          }
         }
       }
       
