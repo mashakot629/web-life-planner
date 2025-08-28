@@ -363,16 +363,29 @@ function App() {
         skillsBlock = ['Як ти можеш застосувати свої навички:', ...skillItems.map(l => '— ' + l.replace(/^[-—\d+.]+\s*/, ''))].join('\n')
       }
 
+      // Покращений парсинг бізнес-плану
       const planHeaderIdx = lines.findIndex(l => /бізнес-план/i.test(l))
       const planLines = planHeaderIdx >= 0 ? lines.slice(planHeaderIdx + 1) : []
-      const pick = (label) => planLines.find(l => new RegExp(label, 'i').test(l)) || ''
+      
+      // Шукаємо кожну секцію окремо
+      const findSection = (keywords) => {
+        const section = planLines.find(l => keywords.some(k => l.toLowerCase().includes(k)))
+        return section ? section.trim() : ''
+      }
+      
+      const budgetSection = findSection(['бюджет', 'витрат'])
+      const clientsSection = findSection(['клієнт', 'клієнти', 'родич', 'сусід'])
+      const timeSection = findSection(['час', 'тиждн', 'місяц'])
+      const growthSection = findSection(['розвит', 'розширен', 'масштаб'])
+      const stepsSection = findSection(['покроков', 'крок', 'план'])
+      
       const lockedParts = [
         'Бізнес-план: коротко',
-        pick('бюджет') || 'Мінімальний бюджет: від 50€ (за потреби реквізит/реклама).',
-        pick('клієнт') || 'Перші клієнти: друзі, локальні групи, соцмережі.',
-        pick('час') || 'Час до прибутку: 1–3 тижні при активних діях.',
-        pick('розвит') || 'Можливості розвитку: масштабування, партнерства, команда.',
-        pick('крок') || 'Покроковий план: 1) Пропозиція. 2) Приклади. 3) Пост/оголошення. 4) Перша подія/послуга. 5) Відгуки.',
+        budgetSection || 'Мінімальний бюджет: від 50€ (за потреби реквізит/реклама).',
+        clientsSection || 'Перші клієнти: друзі, локальні групи, соцмережі.',
+        timeSection || 'Час до прибутку: 1–3 тижні при активних діях.',
+        growthSection || 'Можливості розвитку: масштабування, партнерства, команда.',
+        stepsSection || 'Покроковий план: 1) Пропозиція. 2) Приклади. 3) Пост/оголошення. 4) Перша подія/послуга. 5) Відгуки.',
       ]
       const lockedText = [skillsBlock, lockedParts.join('\n')].filter(Boolean).join('\n\n')
 
