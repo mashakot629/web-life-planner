@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// OpenAI API key from environment variable or fallback
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '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'
+// OpenAI API key from environment variable
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || ''
 
 const i18n = {
   ua: {
