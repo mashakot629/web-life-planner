@@ -325,7 +325,7 @@ function App() {
    - Перші клієнти: (враховуючи місце проживання та наявність інтернету)
    - Час до прибутку: (реалістично для цієї ситуації)
    - Можливості розвитку: (враховуючи обмеження)
-   - Покроковий план: (5 конкретних кроків)
+   - Покроковий план: (5 конкретних кроків, кожен крок з нової рядка)
 
 ВАЖЛИВО: Аналізуй кожен деталь з введених даних. НЕ давай загальних відповідей. Враховуй обмеження: ${restrictionsList.join(', ')}`
     try {
@@ -336,6 +336,7 @@ function App() {
           model: 'gpt-3.5-turbo',
           messages: [ { role: 'system', content: system }, { role: 'user', content: user } ],
           temperature: 0.9,
+          max_tokens: 2000,
         }),
       })
       const data = await res.json()
@@ -379,13 +380,24 @@ function App() {
       const growthSection = findSection(['розвит', 'розширен', 'масштаб'])
       const stepsSection = findSection(['покроков', 'крок', 'план'])
       
+      // Якщо покроковий план не знайдено, шукаємо детальніше
+      let finalStepsSection = stepsSection
+      if (!finalStepsSection) {
+        const detailedSteps = planLines.filter(l => /^\d+[\)\.]|^[•-]\s*\d+/.test(l))
+        if (detailedSteps.length > 0) {
+          finalStepsSection = 'Покроковий план: ' + detailedSteps.slice(0, 5).map((step, i) => 
+            `${i + 1}) ${step.replace(/^[•\-\d\)\.\s]+/, '')}`
+          ).join('\n')
+        }
+      }
+      
       const lockedParts = [
         'Бізнес-план: коротко',
         budgetSection || 'Мінімальний бюджет: від 50€ (за потреби реквізит/реклама).',
         clientsSection || 'Перші клієнти: друзі, локальні групи, соцмережі.',
         timeSection || 'Час до прибутку: 1–3 тижні при активних діях.',
         growthSection || 'Можливості розвитку: масштабування, партнерства, команда.',
-        stepsSection || 'Покроковий план: 1) Пропозиція. 2) Приклади. 3) Пост/оголошення. 4) Перша подія/послуга. 5) Відгуки.',
+        finalStepsSection || 'Покроковий план: 1) Пропозиція. 2) Приклади. 3) Пост/оголошення. 4) Перша подія/послуга. 5) Відгуки.',
       ]
       const lockedText = [skillsBlock, lockedParts.join('\n')].filter(Boolean).join('\n\n')
 
