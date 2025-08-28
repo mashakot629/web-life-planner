@@ -291,8 +291,44 @@ function App() {
       await generatePlanLocal(alt)
       return
     }
-    const system = 'Ти персональний коуч. Пиши стисло, натхненно, конкретно. Українською.'
-    const user = `Ресурси: ${resources}\nНавички: ${skills}\nВподобання: ${preferences}\nОбмеження: ${restrictions}\n\nЗгенеруй: 1) Роль (одним реченням). 2) 3 ідеї для старту (коротко, сильні). 3) "Як ти можеш застосувати свої навички" — до 3 пунктів. 4) "Бізнес-план: коротко" з підзаголовками: Мінімальний бюджет; Перші клієнти; Час до прибутку; Можливості розвитку; Покроковий план (5 пунктів). Без загальних фраз.`
+    
+    // Аналізуємо введені дані для персоналізації
+    const location = resources.includes('село') || resources.includes('Балкани') ? 'сільська місцевість' : 'місто'
+    const budget = resources.includes('грошей обмаль') ? 'мінімальний бюджет' : 'середній бюджет'
+    const timeAvailable = resources.includes('вільного часу багато') ? 'багато вільного часу' : 'обмежений час'
+    const internet = resources.includes('мобільний') ? 'обмежений інтернет' : 'стабільний інтернет'
+    
+    const englishLevel = skills.includes('базові') ? 'базовий рівень' : skills.includes('англійської') ? 'середній рівень' : 'відсутній'
+    const physicalSkills = skills.includes('фізичним') ? 'фізичні навички' : 'відсутні'
+    const organization = skills.includes('організовувати') ? 'відсутні' : 'потрібно розвивати'
+    
+    const workStyle = preferences.includes('сам') ? 'самостійна робота' : preferences.includes('команда') ? 'командна робота' : 'змішана'
+    const environment = preferences.includes('відкритому повітрі') ? 'на відкритому повітрі' : 'в приміщенні'
+    const schedule = preferences.includes('ранніми') ? 'ранній підйом' : 'гнучкий графік'
+    
+    const restrictionsList = restrictions.split(',').map(r => r.trim()).filter(r => r.length > 0)
+    
+    const system = 'Ти персональний коуч. Аналізуй ВСІ введені дані і генеруй план, який точно підходить під цю ситуацію. Пиши стисло, натхненно, конкретно. Українською.'
+    const user = `АНАЛІЗ СИТУАЦІЇ:
+- Місце: ${location}
+- Бюджет: ${budget}
+- Час: ${timeAvailable}
+- Інтернет: ${internet}
+- Англійська: ${englishLevel}
+- Фізичні навички: ${physicalSkills}
+- Організація: ${organization}
+- Стиль роботи: ${workStyle}
+- Середовище: ${environment}
+- Графік: ${schedule}
+- Обмеження: ${restrictionsList.join(', ')}
+
+Згенеруй персоналізований план:
+1) Роль (враховуючи ВСІ обмеження та можливості)
+2) 3 ідеї для старту (реалістичні для цієї ситуації)
+3) "Як ти можеш застосувати свої навички" (враховуючи реальні навички)
+4) "Бізнес-план: коротко" з підзаголовками: Мінімальний бюджет; Перші клієнти; Час до прибутку; Можливості розвитку; Покроковий план (5 пунктів)
+
+ВАЖЛИВО: Враховуй обмеження (${restrictionsList.join(', ')}) і не пропонуй те, що людина точно не хоче робити.`
     try {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
