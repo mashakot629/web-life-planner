@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 
 // OpenAI API key from environment variable or fallback
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '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'
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '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'
 
 const i18n = {
   ua: {
